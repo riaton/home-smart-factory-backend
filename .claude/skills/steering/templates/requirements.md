@@ -43,6 +43,7 @@
 
 ## 参照ドキュメント
 
-- `~/Desktop/home-smart-factory-base/docs/product-requirements.md` - プロダクト要求定義書
-- `~/Desktop/home-smart-factory-base/docs/functional-design.md` - 機能設計書
-- `~/Desktop/home-smart-factory-base/docs/architecture.md` - アーキテクチャ設計書
+> `.claude/commands/add-feature-backend.md` の「機能別 参照ドキュメントマップ」を参照し、該当機能のドキュメントを列挙すること。
+
+- `~/Desktop/home-smart-factory-base/docs/{ドキュメント1}` - {説明}
+- `~/Desktop/home-smart-factory-base/docs/{ドキュメント2}` - {説明}
