@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(steering)",
+      "Skill(development-guidelines-terraform)"
+    ],
+    "deny": [],
+    "ask": []
+  },
+  "hooks": {}
+}
