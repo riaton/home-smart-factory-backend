@@ -1,12 +1,17 @@
 {
-  "name": "smart-container",
-  "image": "mcr.microsoft.com/devcontainers/base:bookworm",
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "name": "home-smart-factory-backend",
+  "image": "mcr.microsoft.com/devcontainers/java:25",
   "features": {
-    "ghcr.io/devcontainers/features/node:1": {
-      "version": "lts"
-    },
+    "ghcr.io/devcontainers/features/gradle:1": {},
     "ghcr.io/anthropics/devcontainer-features/claude-code:1.0": {}
   },
-  "postCreateCommand": "npm install"
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "vscjava.vscode-java-pack",
+        "vmware.vscode-spring-boot"
+      ]
+    }
+  },
+  "postCreateCommand": "chmod +x gradlew"
 }
