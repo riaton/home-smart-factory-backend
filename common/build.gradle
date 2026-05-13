@@ -1,0 +1,5 @@
+// common は Spring Boot 非依存の共通ライブラリ。bootJar は適用しない。
+dependencies {
+    implementation 'com.fasterxml.jackson.core:jackson-annotations'
+    testImplementation 'org.assertj:assertj-core'
+}

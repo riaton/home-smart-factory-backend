@@ -1,0 +1,112 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.0.3' apply false
+    id 'io.spring.dependency-management' version '1.1.7' apply false
+    id 'com.github.spotbugs' version '6.0.26' apply false
+}
+
+allprojects {
+    group = 'com.example'
+    version = '0.0.1-SNAPSHOT'
+}
+
+subprojects {
+    apply plugin: 'java'
+    apply plugin: 'io.spring.dependency-management'
+    apply plugin: 'checkstyle'
+    apply plugin: 'com.github.spotbugs'
+    apply plugin: 'jacoco'
+
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(25)
+        }
+    }
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencyManagement {
+        imports {
+            mavenBom "org.springframework.boot:spring-boot-dependencies:4.0.3"
+        }
+    }
+
+    dependencies {
+        compileOnly 'org.projectlombok:lombok'
+        annotationProcessor 'org.projectlombok:lombok'
+        testCompileOnly 'org.projectlombok:lombok'
+        testAnnotationProcessor 'org.projectlombok:lombok'
+
+        testImplementation 'org.springframework.boot:spring-boot-starter-test'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+
+    checkstyle {
+        toolVersion = '10.21.0'
+        configFile = rootProject.file('config/checkstyle/checkstyle.xml')
+        ignoreFailures = false
+        showViolations = true
+    }
+
+    spotbugs {
+        toolVersion = '4.9.3'
+        excludeFilter = rootProject.file('config/spotbugs/exclude.xml')
+        ignoreFailures = false
+    }
+
+    configurations.spotbugs {
+        resolutionStrategy.force 'org.ow2.asm:asm:9.9.1'
+        resolutionStrategy.force 'org.ow2.asm:asm-tree:9.9.1'
+        resolutionStrategy.force 'org.ow2.asm:asm-analysis:9.9.1'
+        resolutionStrategy.force 'org.ow2.asm:asm-commons:9.9.1'
+        resolutionStrategy.force 'org.ow2.asm:asm-util:9.9.1'
+    }
+
+    spotbugsMain {
+        reports {
+            html {
+                required = true
+            }
+        }
+    }
+
+    jacoco {
+        toolVersion = '0.8.13'
+    }
+
+    jacocoTestReport {
+        reports {
+            xml.required = true
+            html.required = true
+        }
+        dependsOn test
+    }
+
+    jacocoTestCoverageVerification {
+        violationRules {
+            rule {
+                limit {
+                    counter = 'LINE'
+                    value = 'COVEREDRATIO'
+                    minimum = 0.80
+                }
+            }
+            rule {
+                element = 'PACKAGE'
+                includes = ['com.example.smartfactory.*.application.*']
+                limit {
+                    counter = 'LINE'
+                    value = 'COVEREDRATIO'
+                    minimum = 0.90
+                }
+            }
+        }
+    }
+
+    test {
+        useJUnitPlatform()
+        finalizedBy jacocoTestReport
+    }
+}
