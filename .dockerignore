@@ -1,0 +1,15 @@
+.git/
+.gradle/
+.serena/
+build/
+**/build/
+out/
+.devcontainer/
+.github/
+.claude/
+.steering/
+*.md
+memo.txt
+.mcp.json
+.env
+.env.local
