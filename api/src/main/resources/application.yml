@@ -24,6 +24,18 @@ spring:
   session:
     store-type: redis
     timeout: 86400s
+    cookie:
+      name: session_id
+      http-only: true
+      secure: true
+      same-site: lax
+
+google:
+  oauth:
+    client-id: ${GOOGLE_CLIENT_ID}
+    client-secret: ${GOOGLE_CLIENT_SECRET}
+    redirect-uri: ${GOOGLE_REDIRECT_URI}
+    frontend-url: ${FRONTEND_URL}
 
 server:
   port: 8080

@@ -24,10 +24,11 @@ class ApiResponseTest {
     }
 
     @Test
-    @DisplayName("ErrorResponse.of() でエラーメッセージがラップされること")
-    void errorResponse_of_wrapsErrorField() {
-        ErrorResponse response = ErrorResponse.of("エラーが発生しました");
+    @DisplayName("ErrorResponse.of() で code と message が ErrorDetail にラップされること")
+    void errorResponse_of_wrapsErrorDetail() {
+        ErrorResponse response = ErrorResponse.of("SOME_ERROR", "エラーが発生しました");
 
-        assertThat(response.error()).isEqualTo("エラーが発生しました");
+        assertThat(response.error().code()).isEqualTo("SOME_ERROR");
+        assertThat(response.error().message()).isEqualTo("エラーが発生しました");
     }
 }

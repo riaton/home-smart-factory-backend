@@ -1,5 +1,6 @@
 package com.example.smartfactory.api.config;
 
+import com.example.smartfactory.api.auth.InvalidStateException;
 import com.example.smartfactory.api.health.HealthController;
 import com.example.smartfactory.common.exception.DownloadLimitExceededException;
 import com.example.smartfactory.common.exception.DuplicateResourceException;
@@ -35,32 +36,44 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("ResourceNotFoundException は 404 と error フィールドを返すこと")
-    void handleNotFound_returns404WithErrorField() throws Exception {
+    @DisplayName("ResourceNotFoundException は 404 と error.code/message を返すこと")
+    void handleNotFound_returns404() throws Exception {
         given(healthController.health()).willThrow(new ResourceNotFoundException("デバイスが見つかりません"));
 
         mvc.perform(get("/health").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("デバイスが見つかりません"));
+                .andExpect(jsonPath("$.error.code").value("RESOURCE_NOT_FOUND"))
+                .andExpect(jsonPath("$.error.message").value("デバイスが見つかりません"));
     }
 
     @Test
-    @DisplayName("DuplicateResourceException は 409 と error フィールドを返すこと")
-    void handleConflict_returns409WithErrorField() throws Exception {
+    @DisplayName("DuplicateResourceException は 409 と error.code/message を返すこと")
+    void handleConflict_returns409() throws Exception {
         given(healthController.health()).willThrow(new DuplicateResourceException("デバイスIDが重複しています"));
 
         mvc.perform(get("/health").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.error").value("デバイスIDが重複しています"));
+                .andExpect(jsonPath("$.error.code").value("DUPLICATE_RESOURCE"))
+                .andExpect(jsonPath("$.error.message").value("デバイスIDが重複しています"));
     }
 
     @Test
-    @DisplayName("DownloadLimitExceededException は 429 と error フィールドを返すこと")
-    void handleTooManyRequests_returns429WithErrorField() throws Exception {
+    @DisplayName("DownloadLimitExceededException は 429 と error.code を返すこと")
+    void handleTooManyRequests_returns429() throws Exception {
         given(healthController.health()).willThrow(new DownloadLimitExceededException());
 
         mvc.perform(get("/health").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isTooManyRequests())
-                .andExpect(jsonPath("$.error").isNotEmpty());
+                .andExpect(jsonPath("$.error.code").value("DOWNLOAD_LIMIT_EXCEEDED"));
+    }
+
+    @Test
+    @DisplayName("InvalidStateException は 400 と error.code INVALID_STATE を返すこと")
+    void handleInvalidState_returns400() throws Exception {
+        given(healthController.health()).willThrow(new InvalidStateException());
+
+        mvc.perform(get("/health").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("INVALID_STATE"));
     }
 }
