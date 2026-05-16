@@ -7,6 +7,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -17,7 +19,7 @@ public class IotDataService {
     private final IotDataRepository iotDataRepository;
 
     @Transactional
-    public void save(IotMessagePayload payload) {
+    public UUID save(IotMessagePayload payload) {
         Device device = deviceRepository.findByDeviceId(payload.deviceId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Unknown device: " + payload.deviceId()));
@@ -30,5 +32,7 @@ public class IotDataService {
                 payload.motion(),
                 payload.powerW(),
                 payload.recordedAt());
+
+        return device.getUserId();
     }
 }
