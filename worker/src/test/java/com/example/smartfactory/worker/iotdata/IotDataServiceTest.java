@@ -15,6 +15,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -56,8 +57,9 @@ class IotDataServiceTest {
         given(device.getUserId()).willReturn(USER_ID);
         given(deviceRepository.findByDeviceId(DEVICE_ID)).willReturn(Optional.of(device));
 
-        iotDataService.save(payload);
+        UUID result = iotDataService.save(payload);
 
+        assertThat(result).isEqualTo(USER_ID);
         then(iotDataRepository).should().insertWithOnConflictDoNothing(
                 eq(DEVICE_ID),
                 eq(USER_ID),

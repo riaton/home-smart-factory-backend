@@ -1,6 +1,7 @@
 package com.example.smartfactory.worker.sqs;
 
 import com.example.smartfactory.common.exception.ResourceNotFoundException;
+import com.example.smartfactory.worker.anomaly.AnomalyDetectionService;
 import com.example.smartfactory.worker.iotdata.IotDataService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,10 +14,14 @@ import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.UUID;
+
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.BDDMockito.willThrow;
+import static org.mockito.Mockito.inOrder;
 
 @ExtendWith(MockitoExtension.class)
 class IotMessageProcessorTest {
@@ -25,8 +30,13 @@ class IotMessageProcessorTest {
 
     private static final String RECEIPT_HANDLE = "test-receipt-handle";
 
+    private static final UUID USER_ID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+
     @Mock
     private IotDataService iotDataService;
+
+    @Mock
+    private AnomalyDetectionService anomalyDetectionService;
 
     @Mock
     private SqsClient sqsClient;
@@ -37,7 +47,8 @@ class IotMessageProcessorTest {
     void setup() {
         ObjectMapper objectMapper = new ObjectMapper();
         SqsProperties properties = new SqsProperties(QUEUE_URL, "ap-northeast-1");
-        processor = new IotMessageProcessor(iotDataService, sqsClient, properties, objectMapper);
+        processor = new IotMessageProcessor(
+                iotDataService, anomalyDetectionService, sqsClient, properties, objectMapper);
     }
 
     private Message message(String body) {
@@ -45,16 +56,18 @@ class IotMessageProcessorTest {
     }
 
     @Test
-    @DisplayName("正常なメッセージは save を呼び出し DeleteMessage すること")
-    void process_validMessage_savesAndDeletes() {
+    @DisplayName("正常なメッセージは save → DeleteMessage → 異常検知の順に実行すること")
+    void process_validMessage_savesDeletesAndDetectsInOrder() {
         String body = "{\"device_id\":\"room01\",\"temperature\":25.3,\"humidity\":60.1,"
                 + "\"motion\":1,\"power_w\":120.5,\"recorded_at\":\"2026-01-15T10:00:00+09:00\"}";
-        willDoNothing().given(iotDataService).save(any());
+        given(iotDataService.save(any())).willReturn(USER_ID);
+        willDoNothing().given(anomalyDetectionService).detect(any(), any(), any());
 
         processor.process(message(body));
 
-        then(iotDataService).should().save(any());
-        then(sqsClient).should().deleteMessage(any(DeleteMessageRequest.class));
+        var ordered = inOrder(sqsClient, anomalyDetectionService);
+        ordered.verify(sqsClient).deleteMessage(any(DeleteMessageRequest.class));
+        ordered.verify(anomalyDetectionService).detect(any(), any(), any());
     }
 
     @Test
@@ -64,6 +77,7 @@ class IotMessageProcessorTest {
 
         then(iotDataService).shouldHaveNoInteractions();
         then(sqsClient).should().deleteMessage(any(DeleteMessageRequest.class));
+        then(anomalyDetectionService).shouldHaveNoInteractions();
     }
 
     @Test
@@ -91,24 +105,38 @@ class IotMessageProcessorTest {
     void process_unknownDevice_deletesMessage() {
         String body = "{\"device_id\":\"unknown\",\"temperature\":25.3,\"humidity\":60.1,"
                 + "\"motion\":0,\"power_w\":100.0,\"recorded_at\":\"2026-01-15T10:00:00+09:00\"}";
-        willThrow(new ResourceNotFoundException("Unknown device: unknown"))
-                .given(iotDataService).save(any());
+        given(iotDataService.save(any()))
+                .willThrow(new ResourceNotFoundException("Unknown device: unknown"));
 
         processor.process(message(body));
 
         then(sqsClient).should().deleteMessage(any(DeleteMessageRequest.class));
+        then(anomalyDetectionService).shouldHaveNoInteractions();
     }
 
     @Test
-    @DisplayName("RDS 障害時は DeleteMessage を呼ばずリトライを許すこと")
-    void process_rdsError_doesNotDeleteMessage() {
+    @DisplayName("RDS 障害時は DeleteMessage を呼ばず異常検知も実行しないこと")
+    void process_rdsError_doesNotDeleteAndDoesNotDetect() {
         String body = "{\"device_id\":\"room01\",\"temperature\":25.3,\"humidity\":60.1,"
                 + "\"motion\":1,\"power_w\":120.5,\"recorded_at\":\"2026-01-15T10:00:00+09:00\"}";
-        willThrow(new RuntimeException("Connection refused"))
-                .given(iotDataService).save(any());
+        given(iotDataService.save(any())).willThrow(new RuntimeException("Connection refused"));
 
         processor.process(message(body));
 
         then(sqsClient).shouldHaveNoInteractions();
+        then(anomalyDetectionService).shouldHaveNoInteractions();
+    }
+
+    @Test
+    @DisplayName("異常検知が例外をスローしても DeleteMessage は完了していること")
+    void process_anomalyDetectionThrows_messageAlreadyDeleted() {
+        String body = "{\"device_id\":\"room01\",\"temperature\":25.3,\"humidity\":60.1,"
+                + "\"motion\":1,\"power_w\":120.5,\"recorded_at\":\"2026-01-15T10:00:00+09:00\"}";
+        given(iotDataService.save(any())).willReturn(USER_ID);
+        willThrow(new RuntimeException("DB error")).given(anomalyDetectionService).detect(any(), any(), any());
+
+        processor.process(message(body));
+
+        then(sqsClient).should().deleteMessage(any(DeleteMessageRequest.class));
     }
 }

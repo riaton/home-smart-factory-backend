@@ -1,6 +1,7 @@
 package com.example.smartfactory.worker.sqs;
 
 import com.example.smartfactory.common.exception.ResourceNotFoundException;
+import com.example.smartfactory.worker.anomaly.AnomalyDetectionService;
 import com.example.smartfactory.worker.iotdata.IotDataService;
 import com.example.smartfactory.worker.iotdata.IotMessagePayload;
 import tools.jackson.databind.ObjectMapper;
@@ -12,6 +13,8 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
 
+import java.util.UUID;
+
 @Component
 @RequiredArgsConstructor
 public class IotMessageProcessor {
@@ -19,6 +22,8 @@ public class IotMessageProcessor {
     private static final Logger LOG = LoggerFactory.getLogger(IotMessageProcessor.class);
 
     private final IotDataService iotDataService;
+
+    private final AnomalyDetectionService anomalyDetectionService;
 
     private final SqsClient sqsClient;
 
@@ -43,8 +48,9 @@ public class IotMessageProcessor {
             return;
         }
 
+        UUID userId;
         try {
-            iotDataService.save(payload);
+            userId = iotDataService.save(payload);
         } catch (ResourceNotFoundException e) {
             LOG.error("Unknown device: {}, discarding message", payload.deviceId());
             deleteMessage(message.receiptHandle());
@@ -55,6 +61,12 @@ public class IotMessageProcessor {
         }
 
         deleteMessage(message.receiptHandle());
+
+        try {
+            anomalyDetectionService.detect(userId, payload.deviceId(), payload);
+        } catch (Exception e) {
+            LOG.error("anomaly_logs INSERT failed: {}", e.getMessage());
+        }
     }
 
     private void deleteMessage(String receiptHandle) {
