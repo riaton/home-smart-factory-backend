@@ -12,3 +12,9 @@ spring:
     enabled: false
   main:
     web-application-type: none
+
+aws:
+  sqs:
+    queue-url: ${SQS_QUEUE_URL:http://localhost:4566/000000000000/iot-data-queue}
+    region: ${AWS_REGION:ap-northeast-1}
+    polling-enabled: true
