@@ -10,3 +10,9 @@ spring:
     database-platform: org.hibernate.dialect.H2Dialect
   flyway:
     enabled: false
+
+aws:
+  sqs:
+    queue-url: http://localhost:4566/000000000000/iot-data-queue
+    region: ap-northeast-1
+    polling-enabled: false
