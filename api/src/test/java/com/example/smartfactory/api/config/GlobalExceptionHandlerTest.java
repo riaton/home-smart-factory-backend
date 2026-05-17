@@ -14,7 +14,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -75,5 +74,16 @@ class GlobalExceptionHandlerTest {
         mvc.perform(get("/health").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.error.code").value("INVALID_STATE"));
+    }
+
+    @Test
+    @DisplayName("IllegalArgumentException は 400 と VALIDATION_ERROR を返すこと")
+    void handleIllegalArgument_returns400() throws Exception {
+        given(healthController.health()).willThrow(new IllegalArgumentException("page は1以上を指定してください"));
+
+        mvc.perform(get("/health").accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.error.code").value("VALIDATION_ERROR"))
+                .andExpect(jsonPath("$.error.message").value("page は1以上を指定してください"));
     }
 }

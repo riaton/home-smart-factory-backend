@@ -12,3 +12,12 @@ spring:
     enabled: false
   main:
     web-application-type: none
+
+aws:
+  sqs:
+    queue-url: ${SQS_QUEUE_URL:http://localhost:4566/000000000000/iot-data-queue}
+    region: ${AWS_REGION:ap-northeast-1}
+    polling-enabled: true
+  sns:
+    topic-arn: ${SNS_TOPIC_ARN:arn:aws:sns:ap-northeast-1:000000000000:iot-anomaly-notification}
+    region: ${AWS_REGION:ap-northeast-1}
