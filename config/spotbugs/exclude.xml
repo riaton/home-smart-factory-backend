@@ -20,6 +20,11 @@
         <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
     </Match>
 
+    <!-- JPA エンティティのリフレクション経由フィールド書き込みの誤検知を除外 -->
+    <Match>
+        <Bug pattern="UWF_UNWRITTEN_FIELD"/>
+    </Match>
+
     <!-- テストクラスは除外 -->
     <Match>
         <Class name="~.*Test"/>
