@@ -3,6 +3,7 @@ package com.example.smartfactory.api.config;
 import com.example.smartfactory.api.auth.InvalidStateException;
 import com.example.smartfactory.common.exception.DownloadLimitExceededException;
 import com.example.smartfactory.common.exception.DuplicateResourceException;
+import com.example.smartfactory.common.exception.ReportNotFoundException;
 import com.example.smartfactory.common.exception.ResourceNotFoundException;
 import com.example.smartfactory.common.response.ErrorResponse;
 import org.springframework.http.HttpStatus;
@@ -15,6 +16,12 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(ReportNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleReportNotFound(ReportNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ErrorResponse.of("REPORT_NOT_FOUND", ex.getMessage()));
+    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
