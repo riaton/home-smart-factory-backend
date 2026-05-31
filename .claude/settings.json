@@ -1,8 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Skill(steering)",
-      "Skill(development-guidelines-terraform)"
+      "Skill(development-guideline-java)",
+      "Skill(java-test-patterns)",
+      "Write(.claude/skills/**)",
+      "Bash(mkdir -p .claude/skills/**)"
     ],
     "deny": [],
     "ask": []
