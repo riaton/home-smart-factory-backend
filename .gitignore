@@ -43,3 +43,4 @@ memo.txt
 .mcp.json
 .steering/
 .claude/settings.local.json
+.claude/skills/java-test-patterns-workspace
