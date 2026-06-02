@@ -4,11 +4,7 @@
 
 家庭用スマート工場の IoT バックエンド。Java / Spring Boot (Gradle マルチプロジェクト) で構成され、AWS ECS Fargate 上で稼働する。
 
-| モジュール | 役割 |
-|---|---|
-| Worker | IoT デバイスからのデータ受信・蓄積 |
-| Batch | 日次レポート生成 |
-| API | フロントエンド向け REST API |
+Worker（IoT データ受信）/ Batch（日次レポート生成）/ API（REST API）の3モジュール構成。
 
 ---
 
@@ -29,10 +25,36 @@
 ## 技術スタック
 
 - **言語 / FW**: Java 25 / Spring Boot 4.0.x
-- **ビルド**: Gradle (マルチプロジェクト)
+- **ビルド**: Gradle 9.0.0 (マルチプロジェクト)
 - **インフラ**: AWS ECS Fargate
-- **DB**: (詳細設計書参照)
+- **DB**: PostgreSQL 18
+- **ORM**: Spring Data JPA / Hibernate 7.2.4.Final
 - **CI/CD**: GitHub Actions
+
+---
+
+## ディレクトリ構造
+
+### api モジュール
+- `api/src/main/java/.../api/<機能名>/` — Controller・Service・Repository・Entity・dto/ をドメインごとに配置
+- `api/src/main/java/.../api/config/` — 設定クラス・例外ハンドラー
+- `api/src/main/resources/` — application.yml・Flyway マイグレーション
+
+### worker モジュール
+- `worker/src/main/java/.../worker/sqs/` — SQS ポーリング
+- `worker/src/main/java/.../worker/iotdata/` — IoT データ処理
+- `worker/src/main/java/.../worker/anomaly/` — 異常検知
+- `worker/src/main/java/.../worker/sns/` — SNS 通知
+- `worker/src/main/java/.../worker/device/` — デバイス参照
+- `worker/src/main/java/.../worker/config/` — 設定クラス
+
+### batch モジュール
+- `batch/src/main/java/.../batch/report/` — 日次レポート生成
+- `batch/src/main/java/.../batch/cleanup/` — データクリーンアップ
+
+### common モジュール
+- `common/src/main/java/.../common/exception/` — 共通例外クラス
+- `common/src/main/java/.../common/response/` — 共通レスポンスラッパー
 
 ---
 
@@ -40,20 +62,8 @@
 
 `.claude/skills/development-guideline-java/guides/implementation-guide.md` を必ず参照すること。
 
----
-
-## カスタムコマンド / エージェント
-
-| コマンド / エージェント | 用途 |
-|---|---|
-| `/plan-feature <機能名>` | 仕様書を読み、tasklist.md を生成する |
-| `/implement-feature <機能名>` | tasklist.md に従ってコードを実装する |
-| `/ship-feature <機能名>` | 検証・CI・振り返り・PR 作成を行う |
-| `implementation-validator-java` (サブエージェント) | 実装コードと仕様書の整合性検証 |
-
----
-
 ## 行動規範
+
 ### 基本的な行動規範
 - 3ステップ以上のタスクは必ずPlanモードで開始する
 - 変更は必要な箇所のみ。影響範囲を最小化する
