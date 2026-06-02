@@ -57,7 +57,42 @@ description: 機能の実装計画を立て、tasklist.md を生成する
 
 ## ステップ4: tasklist.md の生成
 
-`.claude/skills/steering/templates/tasklist.md` をフォーマットの雛形として読み込み、内容を機能に合わせて置き換えて `.steering/[日付]-[機能名]/tasklist.md` を生成する。
+`.steering/[日付]-[機能名]/tasklist.md` を以下の構成で生成する。
+
+```markdown
+## フェーズ0: 参照ドキュメントの確認
+
+- [ ] docs/backend-design/api-design.md — [対象エンドポイント] 確認
+- [ ] docs/backend-design/db-design.md — [対象テーブル] 確認
+- [ ] docs/sequence/[機能名].md — シーケンス確認
+
+## フェーズ1: Entity・Repository 実装
+
+- [ ] [機能名]/[Entity].java — @Entity ([フィールド・制約を列挙])
+- [ ] [機能名]/[Entity]Repository.java — [メソッドシグネチャ]
+
+## フェーズ2: DTO 実装
+
+- [ ] [機能名]/dto/[Request].java — record ([フィールドを列挙])
+- [ ] [機能名]/dto/[Response].java — record + static from([Entity])
+
+## フェーズ3: Service 実装
+
+- [ ] [機能名]/[Name]Service.java — [メソッドシグネチャ]
+
+## フェーズ4: Controller 実装
+
+- [ ] [機能名]/[Name]Controller.java — [HTTPメソッド] [パス]
+
+## フェーズ5: テスト実装
+
+- [ ] [機能名]/[Name]ServiceTest.java — [テストケースを列挙]
+- [ ] [機能名]/[Name]ControllerTest.java — [テストケースを列挙]
+
+## 実装後の振り返り
+
+（/ship-feature が記入する）
+```
 
 生成時の注意:
 - **フェーズ0**: 読んだドキュメントを1件ずつチェックボックスで列挙する
