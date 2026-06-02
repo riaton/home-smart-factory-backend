@@ -62,10 +62,6 @@ Worker（IoT データ受信）/ Batch（日次レポート生成）/ API（REST
 
 `.claude/skills/development-guideline-java/guides/implementation-guide.md` を必ず参照すること。
 
-## コーディング規約
-
-`.claude/skills/development-guideline-java/guides/implementation-guide.md` を必ず参照すること。
-
 ---
 
 ## カスタムコマンド / エージェント
