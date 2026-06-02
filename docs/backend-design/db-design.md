@@ -6,7 +6,7 @@
 
 # 1. 概要
 
-- DBMS: PostgreSQL（Amazon RDS）
+- DBMS: PostgreSQL 18（Amazon RDS）
 - 文字コード: UTF-8
 - タイムゾーン: UTC（アプリケーション層でJSTに変換）
 
