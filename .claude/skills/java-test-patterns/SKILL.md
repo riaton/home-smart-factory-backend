@@ -1,6 +1,7 @@
 ---
 name: java-test-patterns
 description: このプロジェクト（Spring Boot 4.0 / Mockito BDD）固有のテスト実装パターン。Controller テストの standaloneSetup、Service テストのコンストラクタ注入、BDD スタイルの Mock 記法、テストメソッド命名規則を網羅する。テストクラスを新規作成するとき、既存テストを修正するとき、またはテストの書き方を確認するときに必ず参照する。
+user-invocable: false
 ---
 
 # Java テストパターン（このプロジェクト専用）
