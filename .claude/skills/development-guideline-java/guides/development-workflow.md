@@ -35,7 +35,7 @@ git checkout -b feature/<機能名>
 
 ### ステップ 3 — 静的解析
 
-`reviewer-static-analysist` サブエージェントを起動して静的解析・違反修正を行う。
+`reviewer-static-analyst` サブエージェントを起動して静的解析・違反修正を行う。
 
 - Checkstyle・SpotBugs の違反ゼロになってからステップ 4 へ
 

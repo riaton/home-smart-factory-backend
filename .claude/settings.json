@@ -3,8 +3,16 @@
     "allow": [
       "Skill(development-guideline-java)",
       "Skill(java-test-patterns)",
+      "Skill(git-workflow)",
+      "Skill(plan)",
+      "Skill(implement)",
+      "Skill(review)",
       "Write(.claude/skills/**)",
-      "Bash(mkdir -p .claude/skills/**)"
+      "Write(.claude/plans/**)",
+      "Write(.claude/review/**)",
+      "Bash(mkdir -p .claude/skills/**)",
+      "Bash(mkdir -p .claude/plans)",
+      "Bash(mkdir -p .claude/review)"
     ],
     "deny": [],
     "ask": []

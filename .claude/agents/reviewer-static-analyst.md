@@ -1,5 +1,5 @@
 ---
-name: reviewer-static-analysist
+name: reviewer-static-analyst
 description: レビューエージェント — Checkstyle・SpotBugs静的解析・違反修正・テスト確認を担当する。
 tools: ["Read", "Edit", "Bash"]
 model: sonnet
