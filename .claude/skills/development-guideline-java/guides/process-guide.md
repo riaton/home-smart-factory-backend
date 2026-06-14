@@ -54,124 +54,6 @@ Repository repo = new Repository();
 
 ---
 
-## Git運用ルール
-
-### ブランチ戦略（Git Flow採用）
-
-**Git Flowとは**:
-Vincent Driessenが提唱した、機能開発・リリース・ホットフィックスを体系的に管理するブランチモデル。明確な役割分担により、チーム開発での並行作業と安定したリリースを実現します。
-
-**ブランチ構成**:
-```
-main (本番環境)
-└── develop (開発・統合環境)
-    ├── feature/* (新機能開発)
-    ├── hotfix/* (バグ修正)
-    └── release/* (リリース準備)※必要に応じて
-```
-
-**運用ルール**:
-- **main**: 本番リリース済みの安定版コードのみを保持。タグでバージョン管理
-- **develop**: 次期リリースに向けた最新の開発コードを統合。CIでの自動テスト実施
-- **feature/\*、fix/\***: developから分岐し、作業完了後にPRでdevelopへマージ
-- **直接コミット禁止**: すべてのブランチでPRレビューを必須とし、コード品質を担保
-- **マージ方針**: feature→develop は squash merge、develop→main は merge commit を推奨
-
-**Git Flowのメリット**:
-- ブランチの役割が明確で、複数人での並行開発がしやすい
-- 本番環境(main)が常にクリーンな状態に保たれる
-- 緊急対応時はhotfixブランチで迅速に対応可能（必要に応じて導入）
-
-### コミットメッセージの規約
-
-**Conventional Commitsを推奨**:
-
-```
-<type>(<scope>): <subject>
-
-<body>
-
-<footer>
-```
-
-**Type一覧**:
-```
-feat: 新機能 (minor version up)
-fix: バグ修正 (patch version up)
-docs: ドキュメント
-style: フォーマット (コードの動作に影響なし)
-refactor: リファクタリング
-perf: パフォーマンス改善
-test: テスト追加・修正
-build: ビルドシステム（Gradle設定等）
-ci: CI/CD設定
-chore: その他 (依存関係更新など)
-
-BREAKING CHANGE: 破壊的変更 (major version up)
-```
-
-**良いコミットメッセージの例**:
-
-```
-feat(device): デバイス登録APIを追加
-
-ユーザーが新しいIoTデバイスを登録できるようになりました。
-
-実装内容:
-- DeviceController に POST /api/devices エンドポイント追加
-- DeviceService に登録ロジック実装
-- Bean Validation で入力値を検証
-
-破壊的変更:
-- Device エンティティに deviceType 必須フィールドを追加
-- 既存のデバイスデータはマイグレーションが必要です
-
-Closes #123
-BREAKING CHANGE: Device エンティティに deviceType 必須フィールド追加
-```
-
-### プルリクエストのテンプレート
-
-**効果的なPRテンプレート**:
-
-```markdown
-## 変更の種類
-- [ ] 新機能 (feat)
-- [ ] バグ修正 (fix)
-- [ ] リファクタリング (refactor)
-- [ ] ドキュメント (docs)
-- [ ] その他 (chore)
-
-## 変更内容
-### 何を変更したか
-[簡潔な説明]
-
-### なぜ変更したか
-[背景・理由]
-
-### どのように変更したか
-- [変更点1]
-- [変更点2]
-
-## テスト
-### 実施したテスト
-- [ ] ユニットテスト追加（JUnit 5 / Mockito）
-- [ ] 統合テスト追加（@SpringBootTest / @WebMvcTest）
-- [ ] 手動テスト実施
-
-### テスト結果
-[テスト結果の説明]
-
-## 関連Issue
-Closes #[番号]
-Refs #[番号]
-
-## レビューポイント
-[レビュアーに特に見てほしい点]
-```
-
----
-
 ## テスト戦略
 
 ### テストピラミッド
@@ -226,108 +108,6 @@ class IotDataServiceTest {
 }
 ```
 
-### カバレッジ目標
-
-**測定可能な目標（Gradle + JaCoCo）**:
-
-```groovy
-// build.gradle
-jacocoTestCoverageVerification {
-    violationRules {
-        rule {
-            limit {
-                counter = 'LINE'
-                value = 'COVEREDRATIO'
-                minimum = 0.80  // 全体: 80%以上
-            }
-        }
-        rule {
-            element = 'PACKAGE'
-            includes = ['com.example.smartfactory.application.*']
-            limit {
-                counter = 'LINE'
-                value = 'COVEREDRATIO'
-                minimum = 0.90  // Service 層: 90%以上
-            }
-        }
-    }
-}
-```
-
-**理由**:
-- 重要なビジネスロジック（application/ 以下）は高いカバレッジを要求
-- Controller 層は @WebMvcTest で別途検証
-- 100%を目指さない（コストと効果のバランス）
-
----
-
-## コードレビュープロセス
-
-### レビューの目的
-
-1. **品質保証**: バグの早期発見
-2. **知識共有**: チーム全体でコードベースを理解
-3. **学習機会**: ベストプラクティスの共有
-
-### 効果的なレビューのポイント
-
-**レビュアー向け**:
-
-1. **建設的なフィードバック**
-```markdown
-## ❌ 悪い例
-このコードはダメです。
-
-## ✅ 良い例
-この実装だと N+1 クエリが発生します。
-`JOIN FETCH` を使うと1クエリに改善できます:
-
-```java
-@Query("SELECT d FROM Device d JOIN FETCH d.thresholds WHERE d.userId = :userId")
-List<Device> findByUserIdWithThresholds(@Param("userId") String userId);
-```
-```
-
-2. **優先度の明示**
-```markdown
-[必須] セキュリティ: APIキーがコードにハードコードされています
-[必須] バグ: @Transactional がないため複数のDB操作がアトミックになりません
-[推奨] パフォーマンス: ループ内でのリポジトリ呼び出しを避けましょう
-[提案] 可読性: このメソッド名をもっと明確にできませんか？
-[質問] この処理の意図を教えてください
-```
-
-3. **ポジティブなフィードバックも**
-```markdown
-✨ この実装は分かりやすいですね！
-👍 エッジケースがしっかり考慮されています
-💡 このパターンは他でも使えそうです
-```
-
-**レビュイー向け**:
-
-1. **セルフレビューを実施**
-   - PR作成前に自分でコードを見直す
-   - 説明が必要な箇所にコメントを追加
-
-2. **小さなPRを心がける**
-   - 1PR = 1機能
-   - 変更ファイル数: 10ファイル以内を推奨
-   - 変更行数: 300行以内を推奨
-
-3. **説明を丁寧に**
-   - なぜこの実装にしたか
-   - 検討した代替案
-   - 特に見てほしいポイント
-
-### レビュー時間の目安
-
-- 小規模PR (100行以下): 15分
-- 中規模PR (100-300行): 30分
-- 大規模PR (300行以上): 1時間以上
-
-**原則**: 大規模PRは避け、分割する
-
 ---
 
 ## 自動化の推進
@@ -353,9 +133,6 @@ List<Device> findByUserIdWithThresholds(@Param("userId") String userId);
    - **JUnit 5 + Mockito**
      - ユニットテスト / スライステスト（@WebMvcTest / @DataJpaTest）
      - `./gradlew test` で実行
-   - **JaCoCo**
-     - カバレッジ測定: `./gradlew jacocoTestReport`
-     - カバレッジ検証: `./gradlew jacocoTestCoverageVerification`
 
 4. **ビルド確認**
    - `./gradlew build` で全チェック + コンパイル + テストを一括実行
@@ -369,7 +146,6 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
     id 'checkstyle'
     id 'com.github.spotbugs' version '6.0.0'
-    id 'jacoco'
 }
 
 checkstyle {
@@ -382,16 +158,8 @@ spotbugs {
     excludeFilter = file('config/spotbugs/exclude.xml')
 }
 
-jacocoTestReport {
-    reports {
-        xml.required = true
-        html.required = true
-    }
-}
-
 test {
     useJUnitPlatform()
-    finalizedBy jacocoTestReport
 }
 ```
 
@@ -424,8 +192,8 @@ jobs:
       - name: SpotBugs
         run: ./gradlew spotbugsMain
 
-      - name: Test & Coverage
-        run: ./gradlew test jacocoTestCoverageVerification
+      - name: Test
+        run: ./gradlew test
 
       - name: Build
         run: ./gradlew build -x test
@@ -461,7 +229,7 @@ fi
 - [ ] ブランチ戦略が決まっている
 - [ ] コミットメッセージ規約が明確である
 - [ ] PRテンプレートが用意されている
-- [ ] テストの種類とカバレッジ目標が設定されている（JaCoCo）
+- [ ] テストの種類が定義されている（ユニット / スライス / E2E）
 - [ ] コードレビュープロセスが定義されている
 - [ ] CI/CDパイプラインが構築されている（GitHub Actions + Gradle）
 - [ ] Checkstyle / SpotBugs の設定ファイルがリポジトリに含まれている
