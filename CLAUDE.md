@@ -64,9 +64,6 @@ Worker（IoT データ受信）/ Batch（日次レポート生成）/ API（REST
 - Git 運用・PR フォーマットは `Skill('git-workflow')` を参照すること。
 - テストコードの実装パターンは `Skill('java-test-patterns')` を参照すること。
 
-## 行動規範
-
-=======
 ## コーディング規約
 
 `.claude/skills/development-guideline-java/guides/implementation-guide.md` を必ず参照すること。
